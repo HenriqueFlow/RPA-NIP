@@ -9,7 +9,7 @@ def login_monday_google(driver, email, password):
     Realiza login via Google na página inicial do Monday.com.
     Aguarda corretamente cada etapa e só prossegue após o login ser bem-sucedido.
     """
-    wait = WebDriverWait(driver, 15)
+    wait = WebDriverWait(driver, 20)  # Aumentando tempo de espera para conexões mais lentas
 
     try:
         # Verifica se a tela de login apareceu
@@ -45,8 +45,9 @@ def login_monday_google(driver, email, password):
         time.sleep(5)
         print("Login via Google concluído!")
 
-    except Exception:
-        print("Usuário já está logado! Prosseguindo...")
+    except Exception as e:
+        print(f"Erro durante o login: {e}")
+        print("Usuário já pode estar logado. Prosseguindo...")
 
 # URLs dos dashboards do Monday.com
 dashboards = [
@@ -60,33 +61,66 @@ monday_home = "https://saudeblue.monday.com"
 
 # Configurações do navegador para Raspberry Pi
 options = webdriver.ChromeOptions()
-options.add_argument('--no-sandbox')
-options.add_argument('--disable-dev-shm-usage')
-# options.add_argument('--headless')  # Descomente se quiser rodar sem interface gráfica
+options.binary_location = "/usr/bin/chromium-browser"  # Caminho para o Chromium no Raspberry Pi
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
+options.add_argument("--disable-gpu")
+options.add_argument("--window-size=1920,1080")
+options.add_argument("--disable-software-rasterizer")
+options.add_argument("--remote-debugging-port=9222")
+options.add_argument("--disable-extensions")
+options.add_argument("--disable-infobars")
+options.add_argument("--disable-notifications")
+options.add_argument("--mute-audio")
+options.add_argument("--disable-background-timer-throttling")
+options.add_argument("--disable-backgrounding-occluded-windows")
+options.add_argument("--disable-breakpad")
+options.add_argument("--disable-component-extensions-with-background-pages")
+options.add_argument("--disable-features=TranslateUI,BlinkGenPropertyTrees")
+options.add_argument("--disable-ipc-flooding-protection")
+options.add_argument("--disable-renderer-backgrounding")
+options.add_argument("--disable-sync-preferences")
+options.add_argument("--disable-sync")
+options.add_argument("--metrics-recording-only")
+options.add_argument("--no-first-run")
+options.add_argument("--password-store=basic")
+options.add_argument("--test-type")
+options.add_argument("--use-mock-keychain")
+options.add_argument("--disable-prompt-on-repost")
 
-driver = webdriver.Chrome(options=options)  # Certifique-se de ter o chromedriver instalado
+# Modo headless para Raspberry Pi (descomente para ver o navegador rodando)
+options.add_argument("--headless")
+
+# Caminho do ChromeDriver no Raspberry Pi
+chromedriver_path = "/usr/bin/chromedriver"
+
+# Inicializa o driver do Chrome
+driver = webdriver.Chrome(executable_path=chromedriver_path, options=options)
 
 # Suas credenciais do Google
 EMAIL = "henrique.barreto@saudeblue.com"
-PASSWORD = "GD1D@yFh.g"
+PASSWORD = "SUA_SENHA"
 
-# Abre a página inicial da Monday e faz login
+# 1️⃣ Abre a página inicial da Monday e faz login
 print("Abrindo página inicial da Monday para login...")
 driver.get(monday_home)
 time.sleep(5)  # Aguarda carregamento inicial
 login_monday_google(driver, EMAIL, PASSWORD)
 
-# Aguarda 1 minuto para garantir que o login foi feito corretamente
+# 2️⃣ Aguarda 1 minuto para garantir que o login foi feito corretamente
 print("Aguardando 1 minuto para garantir o login...")
 time.sleep(60)
 
-# Abre os 3 dashboards em novas abas
+# 3️⃣ Abre os 3 dashboards em novas abas
 print("Abrindo dashboards...")
 for url in dashboards:
-    driver.execute_script(f"window.open('{url}', '_blank');")
-    time.sleep(5)  # Pequeno delay entre cada abertura
+    try:
+        driver.execute_script(f"window.open('{url}', '_blank');")
+        time.sleep(5)  # Pequeno delay entre cada abertura
+    except Exception as e:
+        print(f"Erro ao abrir {url}: {e}")
 
-# Fecha a primeira aba (página inicial da Monday)
+# 4️⃣ Fecha a primeira aba (página inicial da Monday)
 abas = driver.window_handles  # Obtém todas as abas abertas
 if len(abas) > 1:
     driver.switch_to.window(abas[0])  # Muda para a primeira aba
@@ -97,7 +131,7 @@ if len(abas) > 1:
 driver.switch_to.window(driver.window_handles[0])  # Garante que estamos na primeira aba útil
 abas = driver.window_handles
 
-# Loop infinito para alternar entre as abas a cada 5 minutos
+# 5️⃣ Loop infinito para alternar entre as abas a cada 5 minutos
 print("Iniciando loop infinito para alternar entre dashboards...")
 while True:
     for aba in abas:
