@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 
 # Configurações do Supabase
 SUPABASE_URL = "https://uvgznbifmwocdpkbuumv.supabase.co"  # Substitua pelo seu URL do Supabase
-SUPABASE_KEY = "SUA_SUPABASE_API_KEY_AQUI"  # Substitua pela sua API Key
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV2Z3puYmlmbXdvY2Rwa2J1dW12Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc1NDgzMzksImV4cCI6MjA1MzEyNDMzOX0.aqwOrYMELMyXtIfph9Val_qq72Q80jQ3hIRCRaOgQbQ"  # Substitua pela sua API Key
 TABLE_NAME = "nips_abertas"  # Nome correto da tabela
 COLUMN_NAME = "demanda"  # Nome correto da coluna
 
