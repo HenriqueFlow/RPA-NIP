@@ -55,11 +55,14 @@ def login_monday(driver, email, password):
     except Exception as e:
         print(f"Erro ao fazer login: {e}")
 
+# URL da página inicial do Monday.com (onde será feito o login)
+monday_home = "https://saudeblue.monday.com"
+
 # URLs dos dashboards do Monday.com
 dashboards = [
-    "https://saudeblue.monday.com/overviews/28996325",  # Primeiro link (onde será feito login)
-    "https://saudeblue.monday.com/overviews/29024003",  # Segundo link (sem login)
-    "https://saudeblue.monday.com/overviews/29011931"   # Terceiro link (sem login)
+    "https://saudeblue.monday.com/overviews/28996325",  # Primeiro dashboard
+    "https://saudeblue.monday.com/overviews/29024003",  # Segundo dashboard
+    "https://saudeblue.monday.com/overviews/29011931"   # Terceiro dashboard
 ]
 
 # Inicializa o WebDriver no modo Kiosk
@@ -69,30 +72,33 @@ driver = iniciar_driver()
 EMAIL = "henrique.barreto@saudeblue.com"
 PASSWORD = "SUA_SENHA"
 
-# 1️⃣ **Abre o primeiro link e realiza o login**
-print(f"Abrindo primeiro link para login: {dashboards[0]}")
-driver.get(dashboards[0])
+# 1️⃣ **Abre a página inicial do Monday.com e realiza login**
+print(f"Abrindo página inicial do Monday para login: {monday_home}")
+driver.get(monday_home)
 time.sleep(5)  # Aguarda carregamento inicial
 login_monday(driver, EMAIL, PASSWORD)
 
-# 2️⃣ **Aguarda 1 minuto antes de abrir o segundo link**
+# 2️⃣ **Aguarda 1 minuto antes de abrir os dashboards**
 print("Aguardando 1 minuto para estabilizar o login...")
 time.sleep(60)
 
-# 3️⃣ **Abre o segundo link (sem necessidade de login)**
-print(f"Abrindo segundo link: {dashboards[1]}")
-driver.execute_script(f"window.open('{dashboards[1]}', '_blank');")
-time.sleep(60)  # Aguarda 1 minuto antes de abrir o próximo
+# 3️⃣ **Abre os dashboards, um por vez, aguardando 1 minuto entre cada abertura**
+abas = [driver.current_window_handle]  # Lista de abas abertas (começa com a aba inicial)
+for url in dashboards:
+    print(f"Abrindo dashboard: {url}")
+    driver.execute_script(f"window.open('{url}', '_blank');")
+    time.sleep(60)  # Aguarda 1 minuto antes de abrir o próximo dashboard
+    abas.append(driver.window_handles[-1])  # Adiciona a nova aba à lista
 
-# 4️⃣ **Abre o terceiro link**
-print(f"Abrindo terceiro link: {dashboards[2]}")
-driver.execute_script(f"window.open('{dashboards[2]}', '_blank');")
-time.sleep(60)  # Aguarda 1 minuto antes de iniciar a rotação
+# 4️⃣ **Fecha a aba da página inicial do Monday**
+if len(abas) > 1:
+    print("Fechando aba inicial do Monday.com...")
+    driver.switch_to.window(abas[0])  # Alterna para a aba inicial
+    driver.close()  # Fecha a aba inicial
+    abas.pop(0)  # Remove da lista
 
-# 5️⃣ **Loop infinito para alternar entre os dashboards**
+# 5️⃣ **Inicia loop infinito alternando entre dashboards**
 print("Iniciando loop de alternância entre dashboards...")
-abas = driver.window_handles  # Obtém todas as abas abertas
-
 while True:
     for aba in abas:
         driver.switch_to.window(aba)
