@@ -27,9 +27,6 @@ def iniciar_driver():
     options.add_argument("--start-maximized")
     options.add_argument("--disable-features=VizDisplayCompositor")
 
-    # Se precisar rodar sem interface gráfica (headless)
-    # options.add_argument("--headless=new")
-
     chromedriver_path = "/usr/bin/chromedriver"
     return webdriver.Chrome(executable_path=chromedriver_path, options=options)
 
@@ -60,9 +57,9 @@ def login_monday(driver, email, password):
 
 # URLs dos dashboards do Monday.com
 dashboards = [
-    "https://saudeblue.monday.com/overviews/28996325",
-    "https://saudeblue.monday.com/overviews/29024003",
-    "https://saudeblue.monday.com/overviews/29011931"
+    "https://saudeblue.monday.com/overviews/28996325",  # Primeiro link (onde será feito login)
+    "https://saudeblue.monday.com/overviews/29024003",  # Segundo link (sem login)
+    "https://saudeblue.monday.com/overviews/29011931"   # Terceiro link (sem login)
 ]
 
 # Inicializa o WebDriver no modo Kiosk
@@ -72,23 +69,30 @@ driver = iniciar_driver()
 EMAIL = "henrique.barreto@saudeblue.com"
 PASSWORD = "SUA_SENHA"
 
-# 1️⃣ **Abre todas as abas dos dashboards de uma vez**
-print("Abrindo dashboards diretamente...")
-for url in dashboards:
-    try:
-        driver.execute_script(f"window.open('{url}', '_blank');")
-        time.sleep(5)
-    except Exception as e:
-        print(f"Erro ao abrir {url}: {e}")
-
-# 2️⃣ **Alterna para a primeira aba e realiza o login**
-print("Alternando para a primeira aba para realizar o login...")
-abas = driver.window_handles
-driver.switch_to.window(abas[0])
+# 1️⃣ **Abre o primeiro link e realiza o login**
+print(f"Abrindo primeiro link para login: {dashboards[0]}")
+driver.get(dashboards[0])
+time.sleep(5)  # Aguarda carregamento inicial
 login_monday(driver, EMAIL, PASSWORD)
 
-# 3️⃣ **Loop infinito para alternar entre os dashboards**
+# 2️⃣ **Aguarda 1 minuto antes de abrir o segundo link**
+print("Aguardando 1 minuto para estabilizar o login...")
+time.sleep(60)
+
+# 3️⃣ **Abre o segundo link (sem necessidade de login)**
+print(f"Abrindo segundo link: {dashboards[1]}")
+driver.execute_script(f"window.open('{dashboards[1]}', '_blank');")
+time.sleep(60)  # Aguarda 1 minuto antes de abrir o próximo
+
+# 4️⃣ **Abre o terceiro link**
+print(f"Abrindo terceiro link: {dashboards[2]}")
+driver.execute_script(f"window.open('{dashboards[2]}', '_blank');")
+time.sleep(60)  # Aguarda 1 minuto antes de iniciar a rotação
+
+# 5️⃣ **Loop infinito para alternar entre os dashboards**
 print("Iniciando loop de alternância entre dashboards...")
+abas = driver.window_handles  # Obtém todas as abas abertas
+
 while True:
     for aba in abas:
         driver.switch_to.window(aba)
