@@ -35,3 +35,7 @@ while True:
         driver.switch_to.window(aba)
         print(f"Exibindo a aba: {aba}")
         time.sleep(60)  # 300 segundos = 5 minutos
+
+
+"C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222 --user-data-dir="C:\chrome_debug_profile"
+
