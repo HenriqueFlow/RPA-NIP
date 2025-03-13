@@ -1,0 +1,31 @@
+def aplicar_filtro_data(driver):
+    """Aplica o filtro de data na interface com um período fixo entre 01/12/2024 e 31/12/2024."""
+    try:
+        salvar_log("[INFO] Aplicando filtro de datas.")
+        wait = WebDriverWait(driver, TEMPO_ESPERA)
+
+        hoje = datetime.now().strftime("%d/%m/%Y")
+        ontem = (datetime.now() - timedelta(days=1)).strftime("%d/%m/%Y")
+
+        # Aguardar até que os campos de data e o botão de busca estejam visíveis
+        salvar_log("[INFO] Aguardando campos de data e botão de busca...")
+        campo_data_inicial = wait.until(EC.visibility_of_element_located((By.ID, "formContent:dtInicio_input")))
+        campo_data_final = wait.until(EC.visibility_of_element_located((By.ID, "formContent:dtFim_input")))
+        botao_buscar = wait.until(EC.element_to_be_clickable((By.ID, "formContent:j_idt82")))
+
+        # Limpar e preencher os campos de data com as datas fixas
+        salvar_log("[INFO] Preenchendo campos de data...")
+        campo_data_inicial.clear()
+        campo_data_inicial.send_keys(ontem)
+        campo_data_final.clear()
+        campo_data_final.send_keys(hoje)
+
+        # Clicar no botão de busca
+        salvar_log("[INFO] Clicando no botão de busca...")
+        botao_buscar.click()
+
+        # Aguardar até que a tabela de resultados esteja visível
+        salvar_log("[INFO] Aguardando tabela de resultados...")
+        wait.until(EC.presence_of_element_located((By.ID, "formContent:j_idt85:tbDemandaAguardandoResposta_data")))
+        salvar_log("Filtro de data aplicado com sucesso.")
+        return True
